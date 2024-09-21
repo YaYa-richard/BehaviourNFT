@@ -75,16 +75,16 @@ function Post({ post, account }) {
       {post.content && (
         <Card style={cardStyle}>
           <p>{post.content}</p>
-          <p>作者：{post.author}</p>
+          <p>Author：{post.author}</p>
           <Button type="link" onClick={likePost} style={buttonStyle}>
-            点赞 ({likes})
+            Likes ({likes})
           </Button>
           <Button
             type="link"
             onClick={() => setShowComments(!showComments)}
             style={buttonStyle}
           >
-            评论 ({comments ? comments.length : 0})
+            Comments ({comments ? comments.length : 0})
           </Button>
           {showComments && (
             <div style={{ marginTop: "10px" }}>
@@ -102,7 +102,7 @@ function Post({ post, account }) {
                 rows={2}
                 value={commentContent}
                 onChange={(e) => setCommentContent(e.target.value)}
-                placeholder="输入评论..."
+                placeholder="Say Something..."
                 style={{ marginTop: "10px" }}
               />
               <Button
@@ -115,7 +115,7 @@ function Post({ post, account }) {
                   marginTop: "10px",
                 }}
               >
-                提交评论
+                Post
               </Button>
             </div>
           )}

@@ -88,7 +88,7 @@ function Forum({ account }) {
       <NewPost account={account} fetchPosts={() => fetchPosts(1)} />
       <div style={searchContainerStyle}>
         <Input.Search
-          placeholder="搜索帖子"
+          placeholder="Search Posts"
           onSearch={handleSearch}
           style={{ width: 200, marginRight: 10 }}
           value={inputSearchTerm}
@@ -104,7 +104,7 @@ function Forum({ account }) {
               border: "none",
             }}
           >
-            返回
+            Return
           </Button>
         )}
       </div>

@@ -75,11 +75,14 @@ function Marketplace({ account }) {
     <div style={containerStyle}>
       <Navbar account={account} />
       <div style={contentStyle}>
-        <h2 style={{ color: "#6b21a8" }}>NFT市场</h2>
-        <p>购买用户画像NFT，我们将为您随机选择对应数量的NFT。</p>
+        <h2 style={{ color: "#6b21a8" }}>NFT Market</h2>
+        <p>
+          When you purchase a user portrait NFT, we will randomly select the
+          corresponding number of NFTs for you.
+        </p>
         <InputNumber min={1} value={quantity} onChange={setQuantity} />
         <Button type="primary" onClick={purchaseNFTs} style={buttonStyle}>
-          购买
+          Buy
         </Button>
       </div>
     </div>

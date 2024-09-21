@@ -60,10 +60,10 @@ function NewPost({ account, fetchPosts }) {
         rows={4}
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        placeholder="说点什么吧..."
+        placeholder="Say Something..."
       />
       <Button type="primary" onClick={submitPost} style={buttonStyle}>
-        发布
+        Post
       </Button>
     </div>
   );
