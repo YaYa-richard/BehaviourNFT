@@ -4,57 +4,102 @@ import Navbar from "./Navbar";
 import Post from "./Post";
 import NewPost from "./NewPost";
 import axios from "axios";
-import { Input } from "antd";
+import { Input, Pagination, Button } from "antd"; // 添加 Button
 
 function Forum({ account }) {
     const [posts, setPosts] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPosts, setTotalPosts] = useState(0);
+    const [isSearching, setIsSearching] = useState(false); // 新增状态
+    const postsPerPage = 10;
 
-    useEffect(() => {
-        // 从后端获取帖子列表，支持搜索
+    const fetchPosts = (page, search = "") => {
         axios
-            .get("/api/posts", { params: { search: searchTerm } })
+            .get("/api/posts", {
+                params: {
+                    search: search,
+                    page: page,
+                    limit: postsPerPage,
+                },
+            })
             .then((response) => {
-                setPosts(response.data);
+                const fetchedPosts = response.data;
+                const postsCnt = fetchedPosts.length;
+                setPosts(fetchedPosts);
+                setTotalPosts(postsCnt);
             })
             .catch((error) => {
                 console.error("获取帖子失败", error);
             });
-    }, [searchTerm]);
+    };
+
+    useEffect(() => {
+        fetchPosts(currentPage, searchTerm);
+    }, [searchTerm, currentPage]);
 
     const handleSearch = (value) => {
-        // 更新搜索词
         setSearchTerm(value);
+        setCurrentPage(1);
+        setIsSearching(true); // 设置搜索状态
 
-        // 记录用户行为
         axios
             .post("/api/user-actions", {
                 user: account,
                 action: "search",
                 keyword: value,
             })
-            .then(() => {
-                // 可以选择性地处理成功情况
-                console.log("用户行为数据已发送");
-            })
             .catch((error) => {
                 console.error("发送用户行为数据失败", error);
             });
     };
 
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
+    const handleReset = () => {
+        setSearchTerm("");
+        setIsSearching(false);
+        setCurrentPage(1);
+        fetchPosts(1, "");
+    };
+
     return (
         <div>
             <Navbar account={account} />
-            <NewPost account={account} setPosts={setPosts} />
-            {/* 添加搜索输入框 */}
-            <Input.Search
-                placeholder="搜索帖子"
-                onSearch={handleSearch} // 使用handleSearch函数
-                style={{ width: 200, margin: "20px" }}
+            <NewPost account={account} fetchPosts={() => fetchPosts(1)} />
+            <div
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    margin: "20px",
+                }}
+            >
+                <Input.Search
+                    placeholder="搜索帖子"
+                    onSearch={handleSearch}
+                    style={{ width: 200 }}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                {isSearching && (
+                    <Button onClick={handleReset} style={{ marginLeft: 10 }}>
+                        返回
+                    </Button>
+                )}
+            </div>
+            {Array.isArray(posts) &&
+                posts.map((post) => (
+                    <Post key={post._id} post={post} account={account} />
+                ))}
+            <Pagination
+                current={currentPage}
+                total={totalPosts}
+                pageSize={postsPerPage}
+                onChange={handlePageChange}
+                style={{ margin: "20px", textAlign: "center" }}
             />
-            {posts.map((post) => (
-                <Post key={post._id} post={post} account={account} />
-            ))}
         </div>
     );
 }
