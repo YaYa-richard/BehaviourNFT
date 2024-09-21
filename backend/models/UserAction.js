@@ -9,42 +9,86 @@ const UserActionSchema = new mongoose.Schema({
 });
 
 // 兴趣检测
-UserActionSchema.methods.detectAllInterests = async function (user) {
-  const interests = {};
-
+UserActionSchema.methods.detectAllInterests = async function (
+  user,
+  action,
+  comment
+) {
+  let value;
+  switch (action) {
+    case "create_post":
+      value = 0.3;
+      break;
+    case "like_post":
+      value = 0.1;
+      break;
+    case "comment_post":
+      value = 0.2;
+      break;
+    default:
+      value = 0;
+      break;
+  }
+  comment = comment.toLowerCase();
   // 调用运动兴趣检测
-  const sportsInterests = await this.detectSportsPreference(user);
-  if (Object.keys(sportsInterests).length) {
-    interests.sports = sportsInterests;
-  }
-
+  const sportsInterests = await this.detectSportsPreference(
+    user,
+    action,
+    comment,
+    value
+  );
   // 调用科技兴趣检测
-  const techInterests = await this.detectTechPreference(user);
-  if (Object.keys(techInterests).length) {
-    interests.tech = techInterests;
-  }
-
-  return interests;
+  const techInterests = await this.detectTechPreference(
+    user,
+    action,
+    comment,
+    value
+  );
+  // 调用音乐兴趣检测
+  const musicInterests = await this.detectMusicPreference(
+    user,
+    action,
+    comment,
+    value
+  );
 };
 
 // 运动兴趣偏好检测
-UserActionSchema.methods.detectSportsPreference = async function (user) {
-  if (this.action === 'comment_post' && this.details.comment) {
-    const tokens = this.details.comment.split(/\s+/);
+UserActionSchema.methods.detectSportsPreference = async function (
+  user,
+  action,
+  comment,
+  value
+) {
+  if (comment) {
+    const tokens = comment.split(/\s+/);
     const interestCategories = {
-      '运动': {
-        likes: ['喜欢', '爱', '热爱', '感兴趣', '偏爱'],
-        dislikes: ['不喜欢', '厌恶', '讨厌'],
-        keywords: ['足球', '篮球', '乒乓球', '羽毛球', '网球', '游泳', '跑步', '自行车'],
+      Sports: {
+        likes: ["like", "love", "passionate about", "interested in", "prefer"],
+        dislikes: ["dislike", "hate", "detest"],
+        keywords: [
+          "soccer",
+          "basketball",
+          "table tennis",
+          "badminton",
+          "tennis",
+          "swimming",
+          "running",
+          "cycling",
+        ],
       },
     };
 
     const foundInterests = {};
 
     for (const [category, keywords] of Object.entries(interestCategories)) {
-      const hasLike = tokens.some(token => keywords.likes.includes(token));
-      const hasDislike = tokens.some(token => keywords.dislikes.includes(token));
-      const containsSport = tokens.some(token => keywords.keywords.includes(token));
+      const hasLike = tokens.some((token) => keywords.likes.includes(token));
+      const hasDislike = tokens.some((token) =>
+        keywords.dislikes.includes(token)
+      );
+      const containsSport = tokens.some((token) =>
+        keywords.keywords.includes(token)
+      );
 
       if (containsSport) {
         // 初始化用户偏好字段
@@ -52,13 +96,19 @@ UserActionSchema.methods.detectSportsPreference = async function (user) {
         user.preferences.sports = user.preferences.sports || 0;
 
         if (hasLike) {
-          foundInterests[category] = '喜欢';
+          foundInterests[category] = "likes";
           // 更新用户的运动偏好
-          user.preferences.sports = Math.min(1, user.preferences.sports + 0.3);
+          user.preferences.sports = Math.min(
+            1,
+            user.preferences.sports + value
+          );
         } else if (hasDislike) {
-          foundInterests[category] = '不喜欢';
+          foundInterests[category] = "dislikes";
           // 更新用户的运动偏好
-          user.preferences.sports = Math.max(-1, user.preferences.sports - 0.3);
+          user.preferences.sports = Math.max(
+            -1,
+            user.preferences.sports - value
+          );
         }
 
         try {
@@ -76,23 +126,43 @@ UserActionSchema.methods.detectSportsPreference = async function (user) {
 };
 
 // 科技兴趣偏好检测
-UserActionSchema.methods.detectTechPreference = async function (user) {
-  if (this.action === 'comment_post' && this.details.comment) {
-    const tokens = this.details.comment.split(/\s+/);
+UserActionSchema.methods.detectTechPreference = async function (
+  user,
+  action,
+  comment,
+  value
+) {
+  if (comment) {
+    const tokens = comment.split(/\s+/);
     const interestCategories = {
-      '科技': {
-        likes: ['喜欢', '爱', '热爱', '感兴趣', '偏爱'],
-        dislikes: ['不喜欢', '厌恶', '讨厌'],
-        keywords: ['人工智能', '机器学习', '编程', '区块链', '虚拟现实', '5G', '科技', '电动汽车'],
+      Technology: {
+        likes: ["like", "love", "passionate about", "interested in", "prefer"],
+        dislikes: ["dislike", "hate", "detest"],
+        keywords: [
+          "ai",
+          "artificial intelligence",
+          "machine learning",
+          "blockchain",
+          "vr",
+          "virtual reality",
+          "ar",
+          "augmented reality",
+          "gadgets",
+          "technology",
+        ],
       },
     };
 
     const foundInterests = {};
 
     for (const [category, keywords] of Object.entries(interestCategories)) {
-      const hasLike = tokens.some(token => keywords.likes.includes(token));
-      const hasDislike = tokens.some(token => keywords.dislikes.includes(token));
-      const containsTech = tokens.some(token => keywords.keywords.includes(token));
+      const hasLike = tokens.some((token) => keywords.likes.includes(token));
+      const hasDislike = tokens.some((token) =>
+        keywords.dislikes.includes(token)
+      );
+      const containsTech = tokens.some((token) =>
+        keywords.keywords.includes(token)
+      );
 
       if (containsTech) {
         // 初始化用户偏好字段
@@ -100,13 +170,19 @@ UserActionSchema.methods.detectTechPreference = async function (user) {
         user.preferences.technology = user.preferences.technology || 0;
 
         if (hasLike) {
-          foundInterests[category] = '喜欢';
+          foundInterests[category] = "likes";
           // 更新用户的科技偏好
-          user.preferences.technology = Math.min(1, user.preferences.technology + 0.3);
+          user.preferences.technology = Math.min(
+            1,
+            user.preferences.technology + value
+          );
         } else if (hasDislike) {
-          foundInterests[category] = '不喜欢';
+          foundInterests[category] = "dislikes";
           // 更新用户的科技偏好
-          user.preferences.technology = Math.max(-1, user.preferences.technology - 0.3);
+          user.preferences.technology = Math.max(
+            -1,
+            user.preferences.technology - value
+          );
         }
 
         try {
@@ -122,5 +198,70 @@ UserActionSchema.methods.detectTechPreference = async function (user) {
   }
   return {};
 };
+UserActionSchema.methods.detectMusicPreference = async function (
+  user,
+  action,
+  comment,
+  value
+) {
+  if (comment) {
+    const tokens = comment.split(/\s+/);
+    const interestCategories = {
+      Music: {
+        likes: ["like", "love", "passionate about", "interested in", "prefer"],
+        dislikes: ["dislike", "hate", "detest"],
+        keywords: [
+          "rock",
+          "pop",
+          "jazz",
+          "classical",
+          "hip-hop",
+          "edm",
+          "blues",
+          "country",
+          "reggae",
+          "music",
+        ],
+      },
+    };
 
+    const foundInterests = {};
+
+    for (const [category, keywords] of Object.entries(interestCategories)) {
+      const hasLike = tokens.some((token) => keywords.likes.includes(token));
+      const hasDislike = tokens.some((token) =>
+        keywords.dislikes.includes(token)
+      );
+      const containsMusic = tokens.some((token) =>
+        keywords.keywords.includes(token)
+      );
+
+      if (containsMusic) {
+        // 初始化用户偏好字段
+        user.preferences = user.preferences || {};
+        user.preferences.music = user.preferences.music || 0;
+
+        if (hasLike) {
+          foundInterests[category] = "likes";
+          // 更新用户的音乐偏好
+          user.preferences.music = Math.min(1, user.preferences.music + value);
+        } else if (hasDislike) {
+          foundInterests[category] = "dislikes";
+          // 更新用户的音乐偏好
+          user.preferences.music = Math.max(-1, user.preferences.music - value);
+        }
+
+        try {
+          await user.save(); // 保存更新
+          console.log(`用户 ${user.walletAddress} 的音乐偏好已更新并保存。`);
+        } catch (error) {
+          console.error("保存用户数据时出错：", error);
+        }
+      }
+    }
+
+    return foundInterests;
+  }
+  return {};
+};
 module.exports = mongoose.model("UserAction", UserActionSchema);
