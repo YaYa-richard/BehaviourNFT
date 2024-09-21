@@ -11,6 +11,13 @@ const containerStyle = {
   padding: "20px",
 };
 
+const contentStyle = {
+  backgroundColor: "white",
+  padding: "20px",
+  borderRadius: "8px",
+  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+};
+
 const searchContainerStyle = {
   display: "flex",
   alignItems: "center",
@@ -22,9 +29,26 @@ function Forum({ account }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPosts, setTotalPosts] = useState(0);
+  const [userProfile, setUserProfile] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const [inputSearchTerm, setInputSearchTerm] = useState(""); // 新增：用于存储输入框中的搜索词
   const postsPerPage = 10;
+
+  const fetchUserProfile = () => {
+    axios
+      .get(`/api/users/${account}`)
+      .then((response) => {
+        if (response.data) {
+          setUserProfile(response.data);
+        } else {
+          setUserProfile(null);
+        }
+      })
+      .catch((error) => {
+        console.error("获取用户画像失败", error);
+        setUserProfile(null);
+      });
+  };
 
   const fetchPosts = (page, search = "") => {
     axios
@@ -46,6 +70,7 @@ function Forum({ account }) {
 
   useEffect(() => {
     fetchPosts(currentPage, searchTerm);
+    fetchUserProfile();
   }, [searchTerm, currentPage]);
 
   const handleSearch = (value) => {
@@ -85,39 +110,41 @@ function Forum({ account }) {
   return (
     <div style={containerStyle}>
       <Navbar account={account} />
-      <NewPost account={account} fetchPosts={() => fetchPosts(1)} />
-      <div style={searchContainerStyle}>
-        <Input.Search
-          placeholder="Search Posts"
-          onSearch={handleSearch}
-          style={{ width: 200, marginRight: 10 }}
-          value={inputSearchTerm}
-          onChange={handleInputChange}
-          enterButton
+      <div style={contentStyle}>
+        <NewPost account={account} fetchPosts={() => fetchPosts(1)} />
+        <div style={searchContainerStyle}>
+          <Input.Search
+            placeholder="Search Posts"
+            onSearch={handleSearch}
+            style={{ width: 200, marginRight: 10 }}
+            value={inputSearchTerm}
+            onChange={handleInputChange}
+            enterButton
+          />
+          {isSearching && (
+            <Button
+              onClick={handleReset}
+              style={{
+                backgroundColor: "#9333ea",
+                color: "white",
+                border: "none",
+              }}
+            >
+              Return
+            </Button>
+          )}
+        </div>
+        {posts.map((post) => (
+          <Post key={post._id} post={post} account={account} />
+        ))}
+        <Pagination
+          current={currentPage}
+          total={totalPosts}
+          pageSize={postsPerPage}
+          onChange={handlePageChange}
+          style={{ margin: "20px 0", textAlign: "center" }}
         />
-        {isSearching && (
-          <Button
-            onClick={handleReset}
-            style={{
-              backgroundColor: "#9333ea",
-              color: "white",
-              border: "none",
-            }}
-          >
-            Return
-          </Button>
-        )}
       </div>
-      {posts.map((post) => (
-        <Post key={post._id} post={post} account={account} />
-      ))}
-      <Pagination
-        current={currentPage}
-        total={totalPosts}
-        pageSize={postsPerPage}
-        onChange={handlePageChange}
-        style={{ margin: "20px 0", textAlign: "center" }}
-      />
     </div>
   );
 }

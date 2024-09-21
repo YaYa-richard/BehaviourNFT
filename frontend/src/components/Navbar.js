@@ -19,6 +19,9 @@ function Navbar({ account }) {
       <Menu.Item key="marketplace" style={menuItemStyle}>
         <Link to="/marketplace">NFT Market</Link>
       </Menu.Item>
+      <Menu.Item key="profile" style={menuItemStyle}>
+        <Link to="/profile">Profile</Link>
+      </Menu.Item>
       <Menu.Item key="account" style={{ ...menuItemStyle, marginLeft: "auto" }}>
         {account.slice(0, 6) + "..." + account.slice(-4)}
       </Menu.Item>
