@@ -89,7 +89,10 @@ exports.likePost = async (req, res) => {
     // 调用综合兴趣检测函数
     await userAction.detectAllInterests(userOBJ, "like_post", post.content);
 
-    res.json({ likes: updatedPost.likes.length });
+    res.json({
+      likes: updatedPost.likes.length,
+      hasLiked: updatedPost.likes.includes(user),
+    });
   } catch (error) {
     console.error("点赞失败", error);
     res.status(500).json({ error: "点赞失败" });
