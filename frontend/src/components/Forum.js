@@ -1,10 +1,21 @@
-// src/components/Forum.js
 import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import Post from "./Post";
 import NewPost from "./NewPost";
 import axios from "axios";
-import { Input, Pagination, Button } from "antd"; // 添加 Button
+import { Input, Pagination, Button } from "antd";
+
+const containerStyle = {
+  backgroundColor: "#f3e8ff",
+  minHeight: "100vh",
+  padding: "20px",
+};
+
+const searchContainerStyle = {
+  display: "flex",
+  alignItems: "center",
+  margin: "20px 0",
+};
 
 function Forum({ account }) {
   const [posts, setPosts] = useState([]);
@@ -64,19 +75,26 @@ function Forum({ account }) {
   };
 
   return (
-    <div>
+    <div style={containerStyle}>
       <Navbar account={account} />
       <NewPost account={account} fetchPosts={() => fetchPosts(1)} />
-      <div style={{ display: "flex", alignItems: "center", margin: "20px" }}>
+      <div style={searchContainerStyle}>
         <Input.Search
           placeholder="搜索帖子"
           onSearch={handleSearch}
-          style={{ width: 200 }}
+          style={{ width: 200, marginRight: 10 }}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         {isSearching && (
-          <Button onClick={handleReset} style={{ marginLeft: 10 }}>
+          <Button
+            onClick={handleReset}
+            style={{
+              backgroundColor: "#9333ea",
+              color: "white",
+              border: "none",
+            }}
+          >
             返回
           </Button>
         )}
@@ -89,7 +107,7 @@ function Forum({ account }) {
         total={totalPosts}
         pageSize={postsPerPage}
         onChange={handlePageChange}
-        style={{ margin: "20px", textAlign: "center" }}
+        style={{ margin: "20px 0", textAlign: "center" }}
       />
     </div>
   );

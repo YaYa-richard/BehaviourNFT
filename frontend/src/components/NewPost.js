@@ -2,6 +2,21 @@ import React, { useState } from "react";
 import { Input, Button } from "antd";
 import axios from "axios";
 
+const containerStyle = {
+  backgroundColor: "white",
+  padding: "20px",
+  borderRadius: "8px",
+  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+  marginBottom: "20px",
+};
+
+const buttonStyle = {
+  backgroundColor: "#9333ea",
+  borderColor: "#9333ea",
+  color: "white",
+  marginTop: "10px",
+};
+
 function NewPost({ account, fetchPosts }) {
   const [content, setContent] = useState("");
 
@@ -40,14 +55,14 @@ function NewPost({ account, fetchPosts }) {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div style={containerStyle}>
       <Input.TextArea
         rows={4}
         value={content}
         onChange={(e) => setContent(e.target.value)}
         placeholder="说点什么吧..."
       />
-      <Button type="primary" onClick={submitPost} style={{ marginTop: "10px" }}>
+      <Button type="primary" onClick={submitPost} style={buttonStyle}>
         发布
       </Button>
     </div>
