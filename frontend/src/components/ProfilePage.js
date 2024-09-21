@@ -65,23 +65,29 @@ const ProfilePage = ({ account }) => {
   }
 
   const data = {
-    labels: ["Sports", "Technology", "Music"],
+    labels: ["Sports", "Technology", "Music", "History", "Art"],
     datasets: [
       {
         data: [
           userProfile.preferences.sports,
           userProfile.preferences.technology,
           userProfile.preferences.music,
+          userProfile.preferences.history,
+          userProfile.preferences.art,
         ],
         backgroundColor: [
           "rgba(255, 99, 132, 0.2)",
           "rgba(54, 162, 235, 0.2)",
           "rgba(255, 206, 86, 0.2)",
+          "rgba(0, 255, 0, 0.2)",
+          "rgba(255, 192, 203, 0.2)",
         ],
         borderColor: [
           "rgba(255, 99, 132, 1)",
           "rgba(54, 162, 235, 1)",
           "rgba(255, 206, 86, 1)",
+          "rgba(0, 255, 0, 1)",
+          "rgba(255, 192, 203, 1)",
         ],
         borderWidth: 1,
       },
