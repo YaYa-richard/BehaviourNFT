@@ -42,7 +42,8 @@ exports.createPost = async (req, res) => {
       details: { postId: savedPost._id },
     });
     await userAction.save();
-
+    // 调用综合兴趣检测函数
+    const user = await User.findOne({ walletAddress: author });
     res.json(savedPost);
   } catch (error) {
     res.status(500).json({ error: "发布帖子失败" });
@@ -66,7 +67,11 @@ exports.likePost = async (req, res) => {
       details: { postId },
     });
     await userAction.save();
-
+    // 对点赞进行画像更新
+    const interests = await userAction.detectAllInterests({
+      content: post.content,
+      user,
+    });
     res.json({ likes: updatedPost.likes.length });
   } catch (error) {
     res.status(500).json({ error: "点赞失败" });
@@ -88,7 +93,8 @@ exports.commentPost = async (req, res) => {
       details: { postId },
     });
     await userAction.save();
-
+    // 调用综合兴趣检测函数
+    const user = await User.findOne({ walletAddress: author });
     res.json({ comments: updatedPost.comments });
   } catch (error) {
     res.status(500).json({ error: "评论失败" });
