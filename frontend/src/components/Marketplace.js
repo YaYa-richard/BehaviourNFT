@@ -28,19 +28,20 @@ function Marketplace({ account }) {
             const web3 = new Web3(window.ethereum);
             // 创建合约实例
             const contract = new web3.eth.Contract(abi, address);
+            console.log("1");
             // 获取每个NFT的价格
             const pricePerNFT = await contract.methods.pricePerNFT().call();
-
             // 计算总价
             const totalPrice = web3.utils
-                .toBN(pricePerNFT)
-                .mul(web3.utils.toBN(quantity));
+                .toBigInt(pricePerNFT)
+                .mul(web3.utils.toBigInt(quantity));
 
             // 调用合约的purchaseNFT方法
             await contract.methods.purchaseNFT(quantity).send({
                 from: account,
                 value: totalPrice,
             });
+            console.log("2");
 
             // 购买成功提示
             message.success("购买成功");

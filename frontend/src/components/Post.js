@@ -59,39 +59,52 @@ function Post({ post, account }) {
             });
     };
     return (
-        <Card style={{ margin: "20px" }}>
-            <p>{post.content}</p>
-            <p>作者：{post.author}</p>
-            <Button type="link" onClick={likePost}>
-                点赞 ({likes})
-            </Button>
-            <Button type="link" onClick={() => setShowComments(!showComments)}>
-                评论 ({comments.length})
-            </Button>
-            {showComments && (
-                <div style={{ marginTop: "10px" }}>
-                    {comments.map((comment, index) => (
-                        <Card key={index} type="inner" title={comment.author}>
-                            {comment.content}
-                        </Card>
-                    ))}
-                    <Input.TextArea
-                        rows={2}
-                        value={commentContent}
-                        onChange={(e) => setCommentContent(e.target.value)}
-                        placeholder="输入评论..."
-                        style={{ marginTop: "10px" }}
-                    />
-                    <Button
-                        type="primary"
-                        onClick={submitComment}
-                        style={{ marginTop: "10px" }}
-                    >
-                        提交评论
+        <>
+            {post.content && (
+                <Card style={{ margin: "20px" }}>
+                    <p>{post.content}</p>
+                    <p>作者：{post.author}</p>
+                    <Button type="link" onClick={likePost}>
+                        点赞 ({likes})
                     </Button>
-                </div>
+                    <Button
+                        type="link"
+                        onClick={() => setShowComments(!showComments)}
+                    >
+                        评论 ({comments ? comments.length : 0})
+                    </Button>
+                    {showComments && (
+                        <div style={{ marginTop: "10px" }}>
+                            {comments.map((comment, index) => (
+                                <Card
+                                    key={index}
+                                    type="inner"
+                                    title={comment.author}
+                                >
+                                    {comment.content}
+                                </Card>
+                            ))}
+                            <Input.TextArea
+                                rows={2}
+                                value={commentContent}
+                                onChange={(e) =>
+                                    setCommentContent(e.target.value)
+                                }
+                                placeholder="输入评论..."
+                                style={{ marginTop: "10px" }}
+                            />
+                            <Button
+                                type="primary"
+                                onClick={submitComment}
+                                style={{ marginTop: "10px" }}
+                            >
+                                提交评论
+                            </Button>
+                        </div>
+                    )}
+                </Card>
             )}
-        </Card>
+        </>
     );
 }
 export default Post;

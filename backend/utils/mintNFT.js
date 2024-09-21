@@ -6,9 +6,12 @@ const Contract = require("../contracts/UserProfileNFT.json"); // 智能合约
 const ContractABI = Contract.abi;
 const ContractAddress = Contract.address; // 智能合约地址
 
+/**
+ * 铸造 NFT 函数
+ */
 exports.mintNFTs = async () => {
     try {
-        const web3 = new Web3("https://YOUR_ETH_NODE"); // 以太坊节点
+        const web3 = new Web3("http://localhost:8545"); // 默认Hardhat本地节点
         const contract = new web3.eth.Contract(ContractABI, ContractAddress);
 
         // 获取所有用户列表
@@ -18,12 +21,12 @@ exports.mintNFTs = async () => {
             // 获取用户的所有行为数据
             const actions = await UserAction.find({ user });
 
-            // 将数据上传到IPFS
+            // 将数据上传到 IPFS
             const ipfsHash = await uploadToIPFS(actions);
 
-            // 调用智能合约，铸造NFT到用户的钱包地址
+            // 调用智能合约，铸造 NFT 到用户的钱包地址
             // 需要拥有合约权限的账户私钥
-            const privateKey = "YOUR_PRIVATE_KEY";
+            const privateKey = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
             const account = web3.eth.accounts.privateKeyToAccount(privateKey);
             web3.eth.accounts.wallet.add(account);
 
@@ -45,10 +48,10 @@ exports.mintNFTs = async () => {
 
             const receipt = await web3.eth.sendTransaction(txData);
             console.log(
-                `成功铸造NFT给用户 ${user} ，交易哈希： ${receipt.transactionHash}`
+                `成功铸造 NFT 给用户 ${user} ，交易哈希： ${receipt.transactionHash}`
             );
         }
     } catch (error) {
-        console.error("铸造NFT失败", error);
+        console.error("铸造 NFT 失败", error);
     }
 };
