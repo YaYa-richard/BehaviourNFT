@@ -75,4 +75,7 @@ contract UserProfileNFT is ERC721, Ownable {
     function getValidCounter() public view returns (uint256) {
         return validCounter;
     }
+    function getTokenCounter() public view returns (uint256) {
+        return tokenCounter;
+    }
 }

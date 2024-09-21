@@ -8,7 +8,7 @@ const userActionsRoutes = require("./routes/userActions");
 const usersRouter = require("./routes/users");
 const cron = require("node-cron");
 const { mintNFTs } = require("./utils/mintNFT");
-const { invalidateNFTs } = require("./utils/invalidateNFT");
+//const { invalidateNFTs } = require("./utils/invalidateNFT");
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
@@ -25,14 +25,17 @@ mongoose
       authSource: "user_behavior_nft", // 指定验证数据库
     }
   )
-  .then(() => console.log("MongoDB连接成功"))
+  .then(
+    () => {console.log("MongoDB连接成功");
+      mintNFTs();}
+    )
   .catch((error) => console.error("MongoDB连接失败", error));
 // 定时任务
-cron.schedule("0 0 * * *", () => {
+/* cron.schedule("0 0 * * *", () => {
   console.log("开始每日任务：铸造NFT和销毁过期的NFT");
   invalidateNFTs();
   mintNFTs();
-});
+}); */
 // 启动服务器
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

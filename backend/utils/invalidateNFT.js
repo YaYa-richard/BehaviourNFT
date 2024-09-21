@@ -47,4 +47,4 @@ async function main() {
     console.log("过期的 NFT 已被标记为无效");
 }
 
-module.exports = { invalidateNFT };
+//module.exports = { invalidateNFT };
