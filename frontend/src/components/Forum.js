@@ -22,7 +22,8 @@ function Forum({ account }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPosts, setTotalPosts] = useState(0);
-  const [isSearching, setIsSearching] = useState(false); // 新增状态
+  const [isSearching, setIsSearching] = useState(false);
+  const [inputSearchTerm, setInputSearchTerm] = useState(""); // 新增：用于存储输入框中的搜索词
   const postsPerPage = 10;
 
   const fetchPosts = (page, search = "") => {
@@ -50,17 +51,23 @@ function Forum({ account }) {
   const handleSearch = (value) => {
     setSearchTerm(value);
     setCurrentPage(1);
-    setIsSearching(true); // 设置搜索状态
+    setIsSearching(!!value);
 
-    axios
-      .post("/api/user-actions", {
-        user: account,
-        action: "search",
-        keyword: value,
-      })
-      .catch((error) => {
-        console.error("发送用户行为数据失败", error);
-      });
+    if (value) {
+      axios
+        .post("/api/user-actions", {
+          user: account,
+          action: "search",
+          keyword: value,
+        })
+        .catch((error) => {
+          console.error("发送用户行为数据失败", error);
+        });
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setInputSearchTerm(e.target.value);
   };
 
   const handlePageChange = (page) => {
@@ -69,6 +76,7 @@ function Forum({ account }) {
 
   const handleReset = () => {
     setSearchTerm("");
+    setInputSearchTerm("");
     setIsSearching(false);
     setCurrentPage(1);
     fetchPosts(1, "");
@@ -83,8 +91,9 @@ function Forum({ account }) {
           placeholder="搜索帖子"
           onSearch={handleSearch}
           style={{ width: 200, marginRight: 10 }}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={inputSearchTerm}
+          onChange={handleInputChange}
+          enterButton
         />
         {isSearching && (
           <Button
