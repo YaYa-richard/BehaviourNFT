@@ -18,6 +18,8 @@ node server.js
 
 ## frontend
 
+##前端已修改，可显示全部评论，每页 10 条，查找评论后可返回页面
+
 ```shell
 yarn start
 ```
