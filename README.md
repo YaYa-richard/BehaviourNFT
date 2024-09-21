@@ -8,7 +8,9 @@ Key words: Hardhat, React, MongoDB, IPFS, Hardhat testnet
 cd backend && yarn install && cd ../frontend && yarn install && cd ../contract && yarn install
 ```
 
-## Install MongoDB
+## 设置 MongoDB
+
+## 设置 IPFS
 
 ## backend
 
