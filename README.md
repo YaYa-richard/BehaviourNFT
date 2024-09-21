@@ -1,14 +1,16 @@
-# user-behavior-nft-project
+Here’s your README in English:
+
+# BehaviourNFT
 
 Key words: Hardhat, React, MongoDB, IPFS, Hardhat testnet
 
-## 下载依赖
+## Install Dependencies
 
 ```shell
 cd backend && yarn install && cd ../frontend && yarn install && cd ../contract && yarn install
 ```
 
-## 安装 MongoDB
+## Install MongoDB
 
 ## backend
 
@@ -24,13 +26,13 @@ yarn start
 
 ## contract
 
-启动 Hardhat 本地网络
+Start the Hardhat local network
 
 ```shell
 yarn hardhat node
 ```
 
-部署
+Deployment
 
 ```shell
 yarn hardhat run ignition/modules/deploy.js --network localhost
