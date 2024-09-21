@@ -1,6 +1,7 @@
 // src/components/Post.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Button, Input } from "antd";
+import { LikeOutlined, LikeFilled, CommentOutlined } from "@ant-design/icons";
 import axios from "axios";
 
 const cardStyle = {
@@ -13,34 +14,48 @@ const buttonStyle = {
   color: "#9333ea",
 };
 
+const activeButtonStyle = {
+  color: "#6b21a8", // 深紫色，表示激活状态
+};
+
+const authorStyle = {
+  color: "blue",
+  fontWeight: "bold",
+};
+
 function Post({ post, account }) {
-  const [likes, setLikes] = useState(post.likes);
+  const [likes, setLikes] = useState(post.likes ? post.likes.length : 0);
   const [comments, setComments] = useState(post.comments);
   const [commentContent, setCommentContent] = useState("");
   const [showComments, setShowComments] = useState(false);
+  const [hasLiked, setHasLiked] = useState(
+    post.likes ? post.likes.includes(account) : false
+  );
+
   const likePost = () => {
+    if (hasLiked) return; // 如果已经点赞，不再响应
+
     axios
       .post(`/api/posts/${post._id}/like`, { user: account })
       .then((response) => {
         setLikes(response.data.likes);
+        setHasLiked(true);
       })
       .catch((error) => {
         console.error("点赞失败", error);
       });
-    // 在likePost函数中
+
     axios
       .post("/api/user-actions", {
         user: account,
         action: "like_post",
         postId: post._id,
       })
-      .then(() => {
-        /* 可以选择性地处理成功情况 */
-      })
       .catch((error) => {
         console.error("发送用户行为数据失败", error);
       });
   };
+
   const submitComment = () => {
     const newComment = {
       author: account,
@@ -55,15 +70,12 @@ function Post({ post, account }) {
       .catch((error) => {
         console.error("评论失败", error);
       });
-    // 在submitComment函数中
+
     axios
       .post("/api/user-actions", {
         user: account,
         action: "comment_post",
         postId: post._id,
-      })
-      .then(() => {
-        /* 可以选择性地处理成功情况 */
       })
       .catch((error) => {
         console.error("发送用户行为数据失败", error);
@@ -75,16 +87,24 @@ function Post({ post, account }) {
       {post.content && (
         <Card style={cardStyle}>
           <p>{post.content}</p>
-          <p>Author：{post.author}</p>
-          <Button type="link" onClick={likePost} style={buttonStyle}>
-            Likes ({likes})
+          <p>
+            Author：<span style={authorStyle}>{post.author}</span>
+          </p>
+          <Button
+            type="text"
+            onClick={likePost}
+            style={hasLiked ? activeButtonStyle : buttonStyle}
+            icon={hasLiked ? <LikeFilled /> : <LikeOutlined />}
+          >
+            {likes > 0 ? likes : ""}
           </Button>
           <Button
-            type="link"
+            type="text"
             onClick={() => setShowComments(!showComments)}
-            style={buttonStyle}
+            style={showComments ? activeButtonStyle : buttonStyle}
+            icon={<CommentOutlined />}
           >
-            Comments ({comments ? comments.length : 0})
+            {comments ? comments.length : 0}
           </Button>
           {showComments && (
             <div style={{ marginTop: "10px" }}>
@@ -92,7 +112,7 @@ function Post({ post, account }) {
                 <Card
                   key={index}
                   type="inner"
-                  title={comment.author}
+                  title={<span style={authorStyle}>{comment.author}</span>}
                   style={{ marginBottom: "10px" }}
                 >
                   {comment.content}
@@ -124,4 +144,5 @@ function Post({ post, account }) {
     </>
   );
 }
+
 export default Post;
