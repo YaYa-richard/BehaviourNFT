@@ -47,5 +47,4 @@ async function invalidateNFT() {
     console.log("过期的 NFT 已被标记为无效");
     return (maxIdx - 1n - curIdx);
 }
-invalidateNFT();
 module.exports = { invalidateNFT };

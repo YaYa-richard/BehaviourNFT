@@ -1,10 +1,10 @@
 // src/components/Marketplace.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import { InputNumber, Button, message } from "antd";
 import Web3 from "web3";
-import axios from "axios";
 import Contract from "../contracts/UserProfileNFT.json";
+import BN from "bn.js";
 
 const containerStyle = {
   backgroundColor: "#f3e8ff",
@@ -25,64 +25,122 @@ const buttonStyle = {
   color: "white",
   marginLeft: "10px",
 };
-// 从合约文件中导入ABI和地址
+
+// 从合约文件中导入 ABI 和地址
 const abi = Contract.abi;
 const address = Contract.address;
 
-// 定义Marketplace组件，接收account作为props
 function Marketplace({ account }) {
-  // 使用useState钩子定义quantity状态，初始值为1
   const [quantity, setQuantity] = useState(1);
+  const [availableNFTs, setAvailableNFTs] = useState(null); // 添加状态变量
 
-  // 定义购买NFT的异步函数
+  useEffect(() => {
+    // 获取可用的 NFT 数量
+    const fetchAvailableNFTs = async () => {
+      try {
+        const web3 = new Web3(window.ethereum);
+        const contract = new web3.eth.Contract(abi, address);
+
+        const tokenCounter = await contract.methods.tokenCounter().call();
+        const validCounter = await contract.methods.getValidCounter().call();
+
+        const available = parseInt(tokenCounter) - parseInt(validCounter);
+        setAvailableNFTs(available);
+      } catch (error) {
+        console.error("获取可用的 NFT 数量失败", error);
+        message.error("无法获取可用的用户画像数量");
+      }
+    };
+
+    fetchAvailableNFTs();
+  }, []);
+
   const purchaseNFTs = async () => {
-    // 检查购买数量是否有效
     if (quantity <= 0) {
       message.error("购买数量必须大于0");
       return;
     }
 
+    if (availableNFTs === null) {
+      message.error("无法获取可用的用户画像数量");
+      return;
+    }
+
+    if (availableNFTs === 0) {
+      message.error("没有可购买的用户画像");
+      return;
+    }
+
+    if (quantity > availableNFTs) {
+      message.error("用户画像数量不足");
+      return;
+    }
+
     try {
-      // 创建Web3实例
       const web3 = new Web3(window.ethereum);
-      // 创建合约实例
       const contract = new web3.eth.Contract(abi, address);
-      // 获取每个NFT的价格
+
+      // 获取每个 NFT 的价格和交易费
       const pricePerNFT = await contract.methods.pricePerNFT().call();
+      const nftPriceBN = new BN(pricePerNFT);
+      const transactionFee = await contract.methods.transactionFee().call();
+      const transactionFeeBN = new BN(transactionFee);
 
-      // 计算总价
-      const totalPrice = web3.utils
-        .toBN(pricePerNFT)
-        .mul(web3.utils.toBN(quantity));
+      // 计算总价和总交易费
+      const totalPrice = nftPriceBN.mul(new BN(quantity));
+      const totalFee = transactionFeeBN.mul(new BN(quantity));
 
-      // 调用合约的purchaseNFT方法
+      // 确保发送的以太数量足够支付总价
+      const totalValue = totalPrice.add(totalFee);
+
+      // 调用合约的 purchaseNFT 方法
       await contract.methods.purchaseNFT(quantity).send({
         from: account,
-        value: totalPrice,
+        value: totalValue.toString(), // 以 wei 为单位的字符串
+        gas: 2000000, // 设置更高的 gas 限额
       });
 
-      // 购买成功提示
       message.success("购买成功");
+
+      // 更新可用的 NFT 数量
+      const tokenCounter = await contract.methods.tokenCounter().call();
+      const validCounter = await contract.methods.getValidCounter().call();
+      const available = parseInt(tokenCounter) - parseInt(validCounter);
+      setAvailableNFTs(available);
+
+      // 如果剩余的 NFT 数量小于当前购买数量，调整购买数量
+      if (quantity > available) {
+        setQuantity(available);
+      }
     } catch (error) {
-      // 错误处理
       console.error("购买失败", error);
       message.error("购买失败");
     }
   };
 
-  // 渲染组件
   return (
     <div style={containerStyle}>
       <Navbar account={account} />
       <div style={contentStyle}>
-        <h2 style={{ color: "#6b21a8" }}>NFT Market</h2>
+        <h2 style={{ color: "#6b21a8" }}>NFT 市场</h2>
+        <p>购买用户画像 NFT，我们将为您顺序选择对应数量的 NFT。</p>
         <p>
-          When you purchase a user portrait NFT, we will randomly select the
-          corresponding number of NFTs for you.
+          当前可购买的用户画像数量：
+          {availableNFTs !== null ? availableNFTs : "加载中..."}
         </p>
-        <InputNumber min={1} value={quantity} onChange={setQuantity} />
-        <Button type="primary" onClick={purchaseNFTs} style={buttonStyle}>
-          Buy
+        <InputNumber
+          min={1}
+          max={availableNFTs !== null ? availableNFTs : undefined}
+          value={quantity}
+          onChange={setQuantity}
+        />
+        <Button
+          type="primary"
+          onClick={purchaseNFTs}
+          style={buttonStyle}
+          disabled={availableNFTs === 0}
+        >
+          购买
         </Button>
       </div>
     </div>
@@ -90,3 +148,4 @@ function Marketplace({ account }) {
 }
 
 export default Marketplace;
+

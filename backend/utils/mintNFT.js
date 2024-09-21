@@ -31,8 +31,14 @@ async function mintNFTs() {
       if (user && user.preferences) {
         console.log(`为用户 ${walletAddress} 获取到的偏好数据：`, user.preferences);
 
-        // 将数据上传到 IPFS
-        const ipfsHash = await uploadToIPFS(user.preferences);
+       // 创建包含 preferences 和 timestamp 的对象
+               const dataToUpload = {
+                  preferences: user.preferences,
+                  timestamp: user.timestamp,
+                };
+        
+                // 将数据上传到 IPFS
+                const ipfsHash = await uploadToIPFS(dataToUpload);
 
         console.log(`成功上传数据到 IPFS，返回的哈希值： ${ipfsHash}`);
 
