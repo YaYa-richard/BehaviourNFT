@@ -2,9 +2,9 @@
 const UserAction = require("../models/UserAction");
 const { uploadToIPFS } = require("./ipfs");
 const Web3 = require("web3");
-const Contract = require("../contracts/UserProfileNFT.json"); // 智能合约
+const Contract = require("../contracts/UserProfileNFT.json");
 const ContractABI = Contract.abi;
-const ContractAddress = Contract.address; // 智能合约地址
+const ContractAddress = Contract.address;
 
 /**
  * 铸造 NFT 函数

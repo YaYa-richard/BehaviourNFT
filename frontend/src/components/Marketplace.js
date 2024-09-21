@@ -5,6 +5,7 @@ import { InputNumber, Button, message } from "antd";
 import Web3 from "web3";
 import axios from "axios";
 import Contract from "../contracts/UserProfileNFT.json";
+import BN from "bn.js"; // 添加这行
 
 // 从合约文件中导入ABI和地址
 const abi = Contract.abi;
@@ -28,18 +29,16 @@ function Marketplace({ account }) {
             const web3 = new Web3(window.ethereum);
             // 创建合约实例
             const contract = new web3.eth.Contract(abi, address);
-            console.log("1");
             // 获取每个NFT的价格
             const pricePerNFT = await contract.methods.pricePerNFT().call();
-            // 计算总价
-            const totalPrice = web3.utils
-                .toBigInt(pricePerNFT)
-                .mul(web3.utils.toBigInt(quantity));
-
+            console.log("Contract methods:", contract.methods);
+            // 使用BN库来计算总价
+            const totalPrice = new BN(pricePerNFT).mul(new BN(quantity));
+            console.log(totalPrice);
             // 调用合约的purchaseNFT方法
-            await contract.methods.purchaseNFT(quantity).send({
+            await contract.methods.purchaseNFT(Number(quantity)).send({
                 from: account,
-                value: totalPrice,
+                value: totalPrice.toString(), // 确保是字符串
             });
             console.log("2");
 
