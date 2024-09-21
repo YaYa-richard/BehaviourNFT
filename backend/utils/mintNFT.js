@@ -5,6 +5,20 @@ const Web3 = require("web3");
 const Contract = require("../contracts/UserProfileNFT.json"); // 智能合约
 const ContractABI = Contract.abi;
 const ContractAddress = Contract.address; // 智能合约地址
+const mongoose = require("mongoose");
+
+mongoose.connect('', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
+.then(() => {
+    console.log("MongoDB 连接成功");
+})
+.catch((err) => {
+    console.error("MongoDB 连接失败", err);
+});
+
+
 
 exports.mintNFTs = async () => {
     try {
