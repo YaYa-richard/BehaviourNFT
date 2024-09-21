@@ -4,26 +4,11 @@ const UserAction = require("../models/UserAction");
 
 exports.getPosts = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const skipIndex = (page - 1) * limit;
         const searchTerm = req.query.search || "";
-
-        const query = searchTerm
-            ? { content: { $regex: searchTerm, $options: "i" } }
-            : {};
-
-        const total = await Post.countDocuments(query);
-        const posts = await Post.find(query)
-            .sort({ createdAt: -1 })
-            .limit(limit)
-            .skip(skipIndex)
-            .exec();
-
-        res.json({
-            posts: posts,
-            total: total,
-        });
+        const posts = await Post.find({
+            content: { $regex: searchTerm, $options: "i" },
+        }).sort({ createdAt: -1 });
+        res.json(posts);
     } catch (error) {
         res.status(500).json({ error: "获取帖子失败" });
     }
@@ -42,6 +27,13 @@ exports.createPost = async (req, res) => {
             details: { postId: savedPost._id },
         });
         await userAction.save();
+
+        // 调用综合兴趣检测函数
+        const user = await User.findOne({ walletAddress: author });
+        if (user) {
+            const interests = await userAction.detectAllInterests(user);
+            console.log(interests); // 你可以在这里处理检测结果
+        }
 
         res.json(savedPost);
     } catch (error) {
@@ -66,6 +58,8 @@ exports.likePost = async (req, res) => {
             details: { postId },
         });
         await userAction.save();
+        // 对点赞进行画像更新
+        const interests = await userAction.detectAllInterests({ content: post.content, user });
 
         res.json({ likes: updatedPost.likes.length });
     } catch (error) {
@@ -88,6 +82,12 @@ exports.commentPost = async (req, res) => {
             details: { postId },
         });
         await userAction.save();
+        // 调用综合兴趣检测函数
+        const user = await User.findOne({ walletAddress: author });
+        if (user) {
+            const interests = await userAction.detectAllInterests(user);
+            console.log(interests); // 你可以在这里处理检测结果
+        }
 
         res.json({ comments: updatedPost.comments });
     } catch (error) {
