@@ -26,6 +26,7 @@ function Forum({ account }) {
             .then((response) => {
                 const fetchedPosts = response.data;
                 const postsCnt = fetchedPosts.length;
+                console.log(fetchedPosts, postsCnt);
                 setPosts(fetchedPosts);
                 setTotalPosts(postsCnt);
             })
