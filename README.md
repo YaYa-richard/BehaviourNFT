@@ -1,5 +1,3 @@
-Here’s your README in English:
-
 # BehaviourNFT
 
 Key words: Hardhat, React, MongoDB, IPFS, Hardhat testnet
