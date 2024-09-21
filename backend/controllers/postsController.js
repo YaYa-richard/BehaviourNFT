@@ -52,7 +52,7 @@ exports.createPost = async (req, res) => {
     }
 
     // 调用综合兴趣检测函数
-    await userAction.detectAllInterests(user);
+    await userAction.detectAllInterests(user, "create_post", content);
 
     res.json(savedPost);
   } catch (error) {
@@ -80,14 +80,14 @@ exports.likePost = async (req, res) => {
     await userAction.save();
 
     // 获取或创建用户对象
-    let userObj = await User.findOne({ walletAddress: user });
-    if (!userObj) {
-      userObj = new User({ walletAddress: user });
-      await userObj.save(); // 保存新用户到数据库
+    let userOBJ = await User.findOne({ walletAddress: user });
+    if (!userOBJ) {
+      userOBJ = new User({ walletAddress: user });
+      await userOBJ.save(); // 保存新用户到数据库
     }
 
     // 调用综合兴趣检测函数
-    await userAction.detectAllInterests(userObj);
+    await userAction.detectAllInterests(userOBJ, "like_post", post.content);
 
     res.json({ likes: updatedPost.likes.length });
   } catch (error) {
@@ -95,8 +95,6 @@ exports.likePost = async (req, res) => {
     res.status(500).json({ error: "点赞失败" });
   }
 };
-
-
 
 exports.commentPost = async (req, res) => {
   try {
@@ -115,14 +113,14 @@ exports.commentPost = async (req, res) => {
     await userAction.save();
 
     // 获取或创建用户对象
-    let user = await User.findOne({ walletAddress: author });
-    if (!user) {
-      user = new User({ walletAddress: author });
-      await user.save(); // 保存新用户到数据库
+    let userOBJ = await User.findOne({ walletAddress: author });
+    if (!userOBJ) {
+      userOBJ = new User({ walletAddress: author });
+      await userOBJ.save(); // 保存新用户到数据库
     }
 
     // 调用综合兴趣检测函数
-    await userAction.detectAllInterests(user);
+    await userAction.detectAllInterests(userOBJ, "comment_post", content);
 
     res.json({ comments: updatedPost.comments });
   } catch (error) {
@@ -130,4 +128,3 @@ exports.commentPost = async (req, res) => {
     res.status(500).json({ error: "评论失败" });
   }
 };
-
