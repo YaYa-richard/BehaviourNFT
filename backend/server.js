@@ -15,12 +15,13 @@ app.use("/api/posts", postsRoutes);
 app.use("/api/user-actions", userActionsRoutes);
 // 数据库连接
 mongoose
-    .connect("mongodb://localhost/user_behavior_nft", {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    })
-    .then(() => console.log("MongoDB连接成功"))
-    .catch((error) => console.error("MongoDB连接失败", error));
+    .connect("", {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        authSource: "user_behavior_nft",  // 指定验证数据库
+    })
+    .then(() => console.log("MongoDB连接成功"))
+    .catch((error) => console.error("MongoDB连接失败", error));
 // 定时任务
 cron.schedule("0 0 * * *", () => {
     console.log("开始每日任务：铸造NFT和销毁过期的NFT");
